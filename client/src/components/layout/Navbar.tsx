@@ -6,6 +6,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
+    { name: 'Calculator', path: '/calculator' },
     { name: 'History', path: '/history' },
   ];
 
