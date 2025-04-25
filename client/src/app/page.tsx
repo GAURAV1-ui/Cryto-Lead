@@ -1,21 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/Button';
 import CryptoTable from '@/components/crypto/CryptoTable';
 import TopCryptos from '@/components/crypto/TopCryptos';
 import PriceChart from '@/components/crypto/PriceChart';
 import { useCryptoData } from '@/utils/api';
 
 export default function HomePage() {
-  const router = useRouter();
   const [selectedCrypto, setSelectedCrypto] = useState('bitcoin');
   const { data: cryptos, isLoading, error } = useCryptoData();
 
-  const handleConvert = () => {
-    router.push('/customer-form');
-  };
 
   if (isLoading) {
     return (

@@ -1,10 +1,4 @@
-import { CustomerFormData } from '@/types';
-
-export interface TransferFormData {
-  walletAddress: string;
-  preferredTimeSlot: string;
-  cryptoType: string;
-}
+import { CustomerFormData, TransferFormData } from '@/types';
 
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -15,10 +15,7 @@ export default function TopCryptos({ cryptos, selected, onSelect }: Props) {
         {cryptos.slice(0, 5).map((crypto) => (
           <div
             key={crypto.id}
-            onClick={() => onSelect(crypto.id)}
-            className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-all ${
-              selected === crypto.id ? 'bg-purple-900/30' : 'hover:bg-gray-800'
-            }`}
+            className="flex justify-between items-center p-3 rounded-md cursor-pointer transition-all hover:bg-gray-800"
           >
             <div className="flex items-center space-x-2">
               <img src={crypto.image} alt={crypto.name} className="w-5 h-5" />

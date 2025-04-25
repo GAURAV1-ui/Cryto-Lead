@@ -7,42 +7,48 @@ import Button from '@/components/ui/Button';
 import FormInput from '@/components/ui/FormInput';
 import PageHeader from '@/components/layout/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { CustomerFormData, Broker } from '@/types';
-import { TransferFormData, validateTransferForm } from '@/utils/validation';
+import { CustomerFormData, Broker, TransferFormData } from '@/types';
+import { validateTransferForm } from '@/utils/validation';
 import { useCreateUser } from '@/utils/api';
 
 export default function CryptoTransferPage() {
   const router = useRouter();
+  const { mutateAsync: createUser } = useCreateUser(); // ✅ Proper usage of hook
 
   const [formData, setFormData] = useState<TransferFormData>({
     walletAddress: '',
     preferredTimeSlot: '',
     cryptoType: 'bitcoin',
   });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [userData, setUserData] = useState<CustomerFormData | null>(null);
   const [selectedBroker, setSelectedBroker] = useState<Broker | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedUserData = localStorage.getItem('customerFormData');
-      const storedBroker = localStorage.getItem('selectedBroker');
+    const fetchData = () => {
+      try {
+        const storedUserData = localStorage.getItem('customerFormData');
+        const storedBroker = localStorage.getItem('selectedBroker');
 
-      if (storedUserData) {
-        const parsedUser = JSON.parse(storedUserData) as CustomerFormData;
-        setUserData(parsedUser);
-        setFormData(prev => ({ ...prev, cryptoType: parsedUser.selectedCrypto }));
-      }
+        if (storedUserData) {
+          const parsedUser = JSON.parse(storedUserData) as CustomerFormData;
+          setUserData(parsedUser);
+          setFormData(prev => ({ ...prev, cryptoType: parsedUser.selectedCrypto }));
+        }
 
-      if (storedBroker) {
-        setSelectedBroker(JSON.parse(storedBroker) as Broker);
+        if (storedBroker) {
+          setSelectedBroker(JSON.parse(storedBroker) as Broker);
+        }
+      } catch (err) {
+        console.error('Error loading stored data:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading stored data:', err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    fetchData();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -51,9 +57,9 @@ export default function CryptoTransferPage() {
 
     if (errors[name]) {
       setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name];
+        return updatedErrors;
       });
     }
   };
@@ -70,7 +76,7 @@ export default function CryptoTransferPage() {
     try {
       localStorage.setItem('transferFormData', JSON.stringify(formData));
 
-      const userDataToSend = {
+      const payload = {
         name: userData?.name || '',
         email: userData?.email || '',
         mobile: userData?.mobile || '',
@@ -79,17 +85,17 @@ export default function CryptoTransferPage() {
         transferDetails: {
           walletAddress: formData.walletAddress,
           preferredTimeSlot: new Date(formData.preferredTimeSlot),
-          cryptoType: formData.cryptoType
+          cryptoType: formData.cryptoType,
         },
         status: 'pending' as const,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
-      await createUser(userDataToSend);
+      await createUser(payload); // ✅ Proper usage
       router.push('/confirmation');
-    } catch (err) {
-      console.error('Failed to save form:', err);
+    } catch (error) {
+      console.error('Failed to save form:', error);
       setErrors(prev => ({
         ...prev,
         submit: 'Failed to save your transfer details. Please try again.',
@@ -165,7 +171,9 @@ export default function CryptoTransferPage() {
                 />
               </div>
 
-              <Button type="submit" fullWidth variant="primary">Continue to Confirmation</Button>
+              <Button type="submit" fullWidth variant="primary">
+                Continue to Confirmation
+              </Button>
             </form>
           </Card>
         </div>

@@ -3,40 +3,34 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
-import { CustomerFormData } from '@/types';
-import { TransferFormData } from '@/utils/validation';
 import Button from '@/components/ui/Button';
 import PageHeader from '@/components/layout/PageHeader';
-
-interface ConfirmationData {
-  customerData: CustomerFormData;
-  selectedBroker: {
-    name: string;
-    minCommission: number;
-    maxCommission: number;
-  };
-  transferDetails: TransferFormData;
-}
+import { ConfirmationData } from '@/types';
 
 export default function ConfirmationPage() {
   const router = useRouter();
   const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null);
 
   useEffect(() => {
-    const customerData = localStorage.getItem('customerFormData');
-    const selectedBroker = localStorage.getItem('selectedBroker');
-    const transferDetails = localStorage.getItem('transferFormData');
+    try {
+      const customerData = localStorage.getItem('customerFormData');
+      const selectedBroker = localStorage.getItem('selectedBroker');
+      const transferDetails = localStorage.getItem('transferFormData');
 
-    if (!customerData || !selectedBroker || !transferDetails) {
+      if (!customerData || !selectedBroker || !transferDetails) {
+        router.push('/');
+        return;
+      }
+
+      setConfirmationData({
+        customerData: JSON.parse(customerData),
+        selectedBroker: JSON.parse(selectedBroker),
+        transferDetails: JSON.parse(transferDetails),
+      });
+    } catch (error) {
+      console.error('Error parsing localStorage:', error);
       router.push('/');
-      return;
     }
-
-    setConfirmationData({
-      customerData: JSON.parse(customerData),
-      selectedBroker: JSON.parse(selectedBroker),
-      transferDetails: JSON.parse(transferDetails),
-    });
   }, [router]);
 
   const handleStartOver = () => {
@@ -46,13 +40,14 @@ export default function ConfirmationPage() {
 
   const formatWalletAddress = (address: string) => {
     if (address.length <= 16) return address;
-    return `${address.substring(0, 8)}...${address.substring(address.length - 8)}`;
+    return `${address.slice(0, 8)}...${address.slice(-8)}`;
   };
 
   if (!confirmationData) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-black">
         <div className="animate-spin h-12 w-12 border-4 border-purple-400 border-t-transparent rounded-full"></div>
+        <span className="ml-4 text-white">Loading confirmation...</span>
       </div>
     );
   }
@@ -79,6 +74,7 @@ export default function ConfirmationPage() {
                 <h3 className="text-lg font-semibold text-purple-400 mb-2">Selected Cryptocurrency</h3>
                 <p className="text-gray-300">{confirmationData.customerData.selectedCrypto}</p>
               </div>
+
               <div className="bg-gray-800 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-purple-400 mb-2">Selected Broker</h3>
                 <p className="text-gray-300">{confirmationData.selectedBroker.name}</p>
@@ -86,13 +82,16 @@ export default function ConfirmationPage() {
                   Commission: {confirmationData.selectedBroker.minCommission}% - {confirmationData.selectedBroker.maxCommission}%
                 </p>
               </div>
+
               <div className="bg-gray-800 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-purple-400 mb-2">Transfer Details</h3>
                 <div className="text-gray-300 break-all">
                   <p className="truncate" title={confirmationData.transferDetails.walletAddress}>
                     Wallet: {formatWalletAddress(confirmationData.transferDetails.walletAddress)}
                   </p>
-                  <p>Date: {new Date(confirmationData.transferDetails.preferredTimeSlot).toLocaleDateString()}</p>
+                  <p>
+                    Date: {new Date(confirmationData.transferDetails.preferredTimeSlot).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             </div>

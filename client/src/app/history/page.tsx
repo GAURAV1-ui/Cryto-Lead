@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -10,29 +9,8 @@ import { UserData } from '@/types';
 
 export default function HistoryPage() {
   const router = useRouter();
-  const [transactions, setTransactions] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const response = await useGetAllUsers();
-        if (response.isSuccess) {
-          setTransactions(response.data);
-        } else {
-          setError('Failed to load transaction history');
-        }
-      } catch (err) {
-        setError('Failed to load transaction history');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, []);
+  const { data, isLoading, isError } = useGetAllUsers();
+  const transactions: UserData[] = Array.isArray(data) ? data : [];
 
   const handleStartNewTransfer = () => {
     localStorage.removeItem('customerFormData');
@@ -41,7 +19,7 @@ export default function HistoryPage() {
     router.push('/');
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
@@ -49,12 +27,12 @@ export default function HistoryPage() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-6 text-center">
           <h2 className="text-xl font-bold mb-4">Error</h2>
-          <p className="mb-4">{error}</p>
+          <p className="mb-4">Failed to load transaction history</p>
           <Button onClick={() => router.push('/')}>Return to Home</Button>
         </Card>
       </div>
@@ -78,7 +56,7 @@ export default function HistoryPage() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {transactions.map((transaction) => (
+              {transactions.map((transaction: UserData) => (
                 <Card key={transaction.email} className="p-6 bg-[#1E1E1E]">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -131,4 +109,4 @@ export default function HistoryPage() {
       </div>
     </div>
   );
-} 
+}

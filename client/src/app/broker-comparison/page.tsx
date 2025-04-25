@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Broker } from '@/types';
 import Card from '@/components/ui/Card';
-import { brokerData } from '@/data/brokers';
+import { brokerData } from '@/data';
 import PageHeader from '@/components/layout/PageHeader';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
