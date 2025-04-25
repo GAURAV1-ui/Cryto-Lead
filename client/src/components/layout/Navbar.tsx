@@ -7,7 +7,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Calculator', path: '/calculator' },
-    { name: 'History', path: '/history' },
+    // { name: 'History', path: '/history' },
   ];
 
   return (
